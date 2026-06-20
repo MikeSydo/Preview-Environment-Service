@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: preview-environments
+  namespace: argocd
+spec:
+  generators:
+    - pullRequest:
+        github:
+          owner: MikeSydo
+          repo: Preview-Environment-Platform
+          tokenRef:
+            secretName: github-token
+            key: token
+            labels:
+              - preview
+        requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: 'preview-pr-{{number}}'
+    spec:
+      project: preview-project
+      source:
+        repoURL: 'https://github.com/MikeSydo/Preview-Environment-Platform.git'
+        targetRevision: '{{head_sha}}'
+        path: helm/preview-app
+        helm:
+          parameters:
+            - name: image.repository
+              value: 'ghcr.io/mikesydo/preview-app'
+            - name: image.tag
+              value: 'pr-{{number}}'
+            - name: ingress.host
+              value: 'pr-{{number}}.localhost'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: 'preview-pr-{{number}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

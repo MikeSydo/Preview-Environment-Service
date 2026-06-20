@@ -1,0 +1,65 @@
+name: Preview TTL Cleanup
+
+on:
+  schedule:
+    - cron: '0 2 * * *' 
+  workflow_dispatch:
+
+jobs:
+  cleanup-stale-previews:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Find stale PRs
+        uses: actions/github-script@v7
+        id: stale
+        with:
+          script: |
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+
+            const now = new Date();
+            const TTL_DAYS = 10;
+            const stale = [];
+
+            for (const pr of prs) {
+              const lastPush = new Date(pr.head.repo.pushed_at);
+              const days = (now - lastPush) / (1000 * 60 * 60 * 24);
+              if (days >= TTL_DAYS) {
+                stale.push({ number: pr.number, days: Math.floor(days) });
+              }
+            }
+
+            core.setOutput('stale', JSON.stringify(stale));
+
+      - name: Delete ArgoCD Applications + comment PR
+        uses: actions/github-script@v7
+        env:
+          STALE: ${{ steps.stale.outputs.stale }}
+          ARGOCD_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+        with:
+          script: |
+            const stale = JSON.parse(process.env.STALE);
+
+            for (const { number, days } of stale) {
+              await fetch(
+                `${process.env.ARGOCD_SERVER}/api/v1/applications/preview-pr-${number}`,
+                {
+                  method: 'DELETE',
+                  headers: { Authorization: `Bearer ${process.env.ARGOCD_TOKEN}` }
+                }
+              );
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: number,
+                body: `**Preview environment was deleted** after ${days} days of inactivity.\n\nMake a new push to restore it automatically.`
+              });
+            }

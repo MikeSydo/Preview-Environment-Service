@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: preview-test-app
+  namespace: argocd
+spec:
+  project: preview-project
+  source:
+    repoURL: 'https://github.com/MikeSydo/Preview-Environment-Platform.git'
+    targetRevision: HEAD
+    path: helm/preview-app
+    helm:
+      parameters:
+        - name: ingress.host
+          value: localhost
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: preview-test
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
