@@ -17,24 +17,24 @@ spec:
         requeueAfterSeconds: 30
   template:
     metadata:
-      name: 'preview-pr-{{number}}'
+      name: "preview-pr-{{number}}"
     spec:
       project: preview-project
       source:
-        repoURL: 'https://github.com/MikeSydo/Preview-Environment-Platform.git'
-        targetRevision: '{{head_sha}}'
+        repoURL: "https://github.com/MikeSydo/Preview-Environment-Service.git"
+        targetRevision: "{{head_sha}}"
         path: helm/preview-app
         helm:
           parameters:
             - name: image.repository
-              value: 'ghcr.io/mikesydo/preview-app'
+              value: "ghcr.io/mikesydo/preview-app"
             - name: image.tag
-              value: 'pr-{{number}}'
+              value: "pr-{{number}}"
             - name: ingress.host
-              value: 'pr-{{number}}.localhost'
+              value: "pr-{{number}}.18.185.231.49.nip.io"
       destination:
-        server: 'https://kubernetes.default.svc'
-        namespace: 'preview-pr-{{number}}'
+        server: "https://kubernetes.default.svc"
+        namespace: "preview-pr-{{number}}"
       syncPolicy:
         automated:
           prune: true
