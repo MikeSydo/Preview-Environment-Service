@@ -12,12 +12,12 @@ spec:
           tokenRef:
             secretName: github-token
             key: token
-          filters:
-            - labelMatch: "preview"
         requeueAfterSeconds: 30
   template:
     metadata:
       name: "preview-pr-{{number}}"
+      labels:
+        app.kubernetes.io/managed-by: argocd-applicationset
     spec:
       project: preview-project
       source:
