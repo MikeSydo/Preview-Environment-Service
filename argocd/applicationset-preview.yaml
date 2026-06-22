@@ -8,12 +8,12 @@ spec:
     - pullRequest:
         github:
           owner: MikeSydo
-          repo: Preview-Environment-Platform
+          repo: Preview-Environment-Service
           tokenRef:
             secretName: github-token
             key: token
-            labels:
-              - preview
+          labels:
+            - preview
         requeueAfterSeconds: 30
   template:
     metadata:
@@ -32,6 +32,8 @@ spec:
               value: "pr-{{number}}"
             - name: ingress.host
               value: "pr-{{number}}.18.185.231.49.nip.io"
+            - name: ingress.port
+              value: "30080"
       destination:
         server: "https://kubernetes.default.svc"
         namespace: "preview-pr-{{number}}"
