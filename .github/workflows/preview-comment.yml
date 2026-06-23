@@ -31,8 +31,8 @@ jobs:
         with:
           number: ${{ steps.pr.outputs.number }}
           message: >
-            Preview environment is ready:
-            http://pr${{ steps.pr.outputs.number }}.18.185.231.49.sslip.io:30080
+            🚀 Preview environment is ready:
+            http://pr-${{ steps.pr.outputs.number }}.18-185-231-49.nip.io:30080
 
       - name: Set GitHub deployment status
         uses: actions/github-script@v7
@@ -43,7 +43,7 @@ jobs:
               repo: context.repo.repo,
               sha: context.payload.workflow_run.head_sha,
               state: 'success',
-              target_url: `http://pr${process.env.PR_NUMBER}.18.185.231.49.sslip.io:30080`,
+              target_url: `http://pr-${process.env.PR_NUMBER}.18-185-231-49.nip.io:30080`,
               description: 'Preview environment is ready',
               context: 'preview/environment'
             });

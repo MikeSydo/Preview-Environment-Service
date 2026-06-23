@@ -31,7 +31,7 @@ spec:
             - name: image.tag
               value: "pr-{{number}}"
             - name: ingress.host
-              value: "pr{{number}}.18.185.231.49.sslip.io"
+              value: "pr-{{number}}.18-185-231-49.nip.io"
             - name: ingress.port
               value: "30080"
       destination:
