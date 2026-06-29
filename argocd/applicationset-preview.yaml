@@ -18,6 +18,8 @@ spec:
       name: "preview-pr-{{number}}"
       labels:
         app.kubernetes.io/managed-by: argocd-applicationset
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
     spec:
       project: preview-project
       source:
