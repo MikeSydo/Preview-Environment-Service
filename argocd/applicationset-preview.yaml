@@ -22,7 +22,7 @@ spec:
       project: preview-project
       source:
         repoURL: "https://github.com/MikeSydo/Preview-Environment-Service.git"
-        targetRevision: "{{head_sha}}"
+        targetRevision: "main"
         path: helm/preview-app
         helm:
           parameters:
