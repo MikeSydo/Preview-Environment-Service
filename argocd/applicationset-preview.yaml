@@ -9,15 +9,15 @@ spec:
         github:
           owner: MikeSydo
           repo: Preview-Environment-Service
-          tokenRef:
-            secretName: github-token
-            key: token
+          appSecretName: github-app-creds
         requeueAfterSeconds: 30
   template:
     metadata:
       name: "preview-pr-{{number}}"
       labels:
         app.kubernetes.io/managed-by: argocd-applicationset
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
     spec:
       project: preview-project
       source:
