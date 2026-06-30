@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: preview-namespace-cleanup
+  namespace: argocd
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: preview-cleanup-sa
+          containers:
+            - name: cleanup
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  for ns in $(kubectl get ns --no-headers | grep preview | awk '{print $1}'); do
+                    PR=$(echo $ns | sed 's/preview-pr-//')
+                    kubectl get application preview-pr-$PR -n argocd 2>/dev/null \
+                      || kubectl delete ns $ns --ignore-not-found=true
+                  done
+          restartPolicy: OnFailure
